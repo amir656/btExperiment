@@ -1,0 +1,8 @@
+{
+    "tracker_host":      "192.1",
+    "seeder_hosts":      ["192.2"],
+    "seeders_per_host":  2,
+    "leecher_hosts":     ["192.3"],
+    "leechers_per_host": 1,
+    "torrent_sizes":     [1024, 5120, 10240, 20480]
+}
