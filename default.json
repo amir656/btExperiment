@@ -1,8 +1,8 @@
 {
-    "tracker_host":      "192.1",
-    "seeder_hosts":      ["192.2"],
+    "tracker_host":      "localhost",
+    "seeder_hosts":      ["localhost"],
     "seeders_per_host":  2,
-    "leecher_hosts":     ["192.3"],
+    "leecher_hosts":     ["localhost"],
     "leechers_per_host": 1,
     "torrent_sizes":     [1024, 5120, 10240, 20480]
 }

@@ -12,11 +12,10 @@ def is_valid_file(parser, arg):
 parser = argparse.ArgumentParser(description='Read in Json Configuration.')
 parser.add_argument('--config', type=str, default="default.json",
                     help='Pass in a JSON detailing how to run experiment')
-parser.add_argument('-d', type=bool, default=False,
+parser.add_argument('-db', action='store_true',
                     help='prints out commands instead of executing to debug')
 args = parser.parse_args()
-configFile = args.config
-debug = args.d
+configFile, debug = args.config, args.db
 
 # Parse argument JSON
 with open(configFile) as f:
@@ -55,20 +54,22 @@ def genTorrent(size):
     if debug:
         print(dCMD)
         os.system("touch " + file + ".txt")
+        os.system("touch " + file + ".torrent")
     else:
         os.system(dCMD)
     return file
 
-os.system("mkdir torrents")
+if not os.path.isdir("torrents"):
+    os.system("mkdir torrents")
 for i in config["torrent_sizes"]:
     genTorrent(i)
 # Create seeders
 def gen_peer(host, file, seed=False):
     tfile = file[:-4] + ".torrent"
     if seed:
-        cmd = ["python run_peers.py -seed=True -num=" + str(config["seeders_per_host"]), "-tor=" + tfile, "-dest=" + file, "-db=" + str(debug)]
+        cmd = ["python run_peers.py -seed -num=" + str(config["seeders_per_host"]), "-tor=torrents/" + tfile, "-dest=torrents/" + file, "-db"]
     else:
-        cmd = ["python run_peers.py -seed=False -num=" + str(config["leechers_per_host"]), "-tor=" + tfile, "-dest=" + file, "-db=" + str(debug)]
+        cmd = ["python run_peers.py -num=" + str(config["leechers_per_host"]), "-tor=torrents/" + tfile, "-dest=torrents/" + file, "-db"]
     pCMD = " ".join(["ssh", host, "sudo bash setup.sh;"] + cmd)
     if debug:
         print(pCMD)
