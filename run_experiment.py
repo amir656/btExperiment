@@ -29,7 +29,7 @@ dockerPre = ["sudo docker run -d --network host kraken"]
 hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
 for host in hosts:
     cpyCMD = "scp setup.sh " + host + ":"
-    if db:
+    if debug:
         print(cpyCMD)
     else:
         os.system(cpyCMD)
