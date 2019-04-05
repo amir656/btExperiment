@@ -48,9 +48,9 @@ def genTorrent(size):
     # Generate file of appropriate size
     fillStr = '"y"'
     if size % 8 == 0:
-        fillStr = '"Net Sys"'
+        fillStr = 'Net Sys'
     file = "torrents/test_" + str(size)
-    repettions = str(size / (len(fillStr) + 1))
+    repettions = str(size // (len(fillStr) + 1))
     gCMD = " ".join(["yes", fillStr, "| head -n",  repettions, ">", file + ".txt"])
     if debug:
         print(gCMD)
@@ -92,5 +92,5 @@ for host in config["seeder_hosts"]:
 for host in config["leecher_hosts"]:
     for file in os.listdir("torrents"):
         if file.endswith(".torrent"):
-        gen_peer(host, file)
+            gen_peer(host, file)
 # Aggreagate logs
