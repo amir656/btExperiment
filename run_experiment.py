@@ -25,6 +25,14 @@ print(config)
 # Docker prefix for all commands
 dockerPre = ["sudo docker run -d --network host kraken"]
 
+# Copy setup.sh to all the hosts
+hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
+for host in hosts:
+    cpyCMD = "scp setup.sh " + host + ":"
+    if db:
+        print(cpyCMD)
+    else:
+        os.system(cpyCMD)
 # Start tracker
 # SSH into host?
 tracker = ["python murder_tracker.py"]
