@@ -57,8 +57,8 @@ def genTorrent(size):
     else:
         os.system(gCMD)
     # Create torrent file for it
-    murderTorr = ["python murder_make_torrent.py", file + ".txt", file + ".torrent", "localhost"]
-    dCMD = " ".join(dockerPre + murderTorr)
+    murderTorr = ["python murder_make_torrent.py", file + ".txt", "localhost", file + ".torrent"]
+    dCMD = " ".join(murderTorr)
     if debug:
         print(dCMD)
         os.system("touch " + file + ".txt")
@@ -91,5 +91,6 @@ for host in config["seeder_hosts"]:
 # Create leechers
 for host in config["leecher_hosts"]:
     for file in os.listdir("torrents"):
+        if file.endswith(".torrent"):
         gen_peer(host, file)
 # Aggreagate logs

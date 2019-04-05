@@ -35,7 +35,7 @@ for i in range(num_seeders):
     else:
         name = "peer" + str(i)
     dockerPre = ["sudo docker run --name", name, "-d --network host kraken"]
-    murderClient = ["python murder_client.py seed", file, file_dest, "localhost"]
+    murderClient = ["python murder_client.py seed", file_dest, file, "localhost"]
     CMD = " ".join(dockerPre + murderClient)
     if db:
         print(CMD)
