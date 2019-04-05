@@ -28,7 +28,7 @@ dockerPre = ["sudo docker run -d --network host kraken"]
 # Start tracker
 # SSH into host?
 tracker = ["python murder_tracker.py"]
-tCMD = " ".join(["ssh", config["tracker_host"], "sudo bash setup.sh;"] + dockerPre + tracker)
+tCMD = " ".join(["ssh", config["tracker_host"], "bash setup.sh;"] + dockerPre + tracker)
 if debug:
     print(tCMD)
 else:
@@ -70,7 +70,7 @@ def gen_peer(host, file, seed=False):
         cmd = ["python run_peers.py -seed -num=" + str(config["seeders_per_host"]), "-tor=torrents/" + tfile, "-dest=torrents/" + file, "-db"]
     else:
         cmd = ["python run_peers.py -num=" + str(config["leechers_per_host"]), "-tor=torrents/" + tfile, "-dest=torrents/" + file, "-db"]
-    pCMD = " ".join(["ssh", host, "sudo bash setup.sh;"] + cmd)
+    pCMD = " ".join(["ssh", host, "bash setup.sh;"] + cmd)
     if debug:
         print(pCMD)
     else:
