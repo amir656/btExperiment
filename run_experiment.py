@@ -75,9 +75,11 @@ for i in config["torrent_sizes"]:
 def gen_peer(host, file, seed=False):
     txtfile = file[:-8] + ".txt"
     if seed:
-        cmd = ["python run_peers.py -seed -num=" + str(config["seeders_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile, "-db"]
+        cmd = ["python run_peers.py -seed -num=" + str(config["seeders_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile]
     else:
-        cmd = ["python run_peers.py -num=" + str(config["leechers_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile, "-db"]
+        cmd = ["python run_peers.py -num=" + str(config["leechers_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile]
+    if db:
+        cmd = cmd + [" -db"]
     pCMD = " ".join(["ssh", host, "bash setup.sh;"] + cmd)
     if debug:
         print(pCMD)
