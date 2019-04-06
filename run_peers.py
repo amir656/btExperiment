@@ -21,7 +21,7 @@ parser.add_argument('-db', action='store_true', default=False,
                     help='print out commands for debugging? (default: False)')
 
 args = parser.parse_args()
-seed, num_seeders, file, file_dest, db = args.seed, args.num, args.tor, args.dest, args.db
+seed, num_seeders, file, file_dest, debug = args.seed, args.num, args.tor, args.dest, args.db
 
 if seed:
     assert is_valid_file(parser, file_dest), "Seeders require the file: " + file_dest
@@ -37,7 +37,7 @@ for i in range(num_seeders):
     dockerPre = ["sudo docker run -d --network host kraken"]
     murderClient = ["python murder_client.py seed", file, file_dest, "localhost"]
     CMD = " ".join(dockerPre + murderClient)
-    if db:
+    if debug:
         print(CMD)
     else:
         os.system(CMD)
