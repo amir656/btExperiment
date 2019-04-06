@@ -2,7 +2,7 @@
     "tracker_host":      "localhost",
     "seeder_hosts":      ["localhost"],
     "seeders_per_host":  2,
-    "leecher_hosts":     ["localhost"],
+    "leecher_hosts":     ["localhost", "localhost"],
     "leechers_per_host": 1,
     "torrent_sizes":     [1024, 5120, 10240, 20480]
 }

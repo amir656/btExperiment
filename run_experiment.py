@@ -2,11 +2,14 @@ import os
 import json
 import argparse
 
-def is_valid_file(parser, arg):
-    if not os.path.exists(arg):
-        parser.error("The file %s does not exist!" % arg)
+def is_valid_file(parser, file):
+    """
+    Checks if the file exists, erroring if it doesn't.
+    """
+    if not os.path.exists(file):
+        parser.error("The file %s does not exist!" % file)
     else:
-        return arg
+        return file
 
 # Parse argument
 parser = argparse.ArgumentParser(description='Read in Json Configuration.')
@@ -24,19 +27,30 @@ print(config)
 
 # Docker prefix for all commands
 dockerPre = ["sudo docker run -d --network host kraken"]
+# List of all hosts
+hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
+
+
+def copy(file, hosts, dir=False):
+    """
+    Copies file to hosts, set dir to true if file is a dir
+    """
+    for host in hosts:
+        if dir:
+            cpyCMD = " ".join(["scp -r", file, host + ":"])
+        else:
+            cpyCMD = " ".join(["scp", file, host + ":"])
+        if debug:
+            print(cpyCMD)
+        else:
+            os.system(cpyCMD)
 
 # Copy setup.sh to all the hosts
-hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
-for host in hosts:
-    cpyCMD = "scp setup.sh " + host + ":"
-    if debug:
-        print(cpyCMD)
-    else:
-        os.system(cpyCMD)
+copy('setup.sh', hosts)
+
 # Start tracker
-# SSH into host?
 tracker = ["python murder_tracker.py"]
-tCMD = " ".join(["ssh", config["tracker_host"], "bash setup.sh;"] + dockerPre + tracker)
+tCMD = " ".join(["ssh", config["tracker_host"], 'bash "setup.sh;'] + dockerPre + tracker) + '"'
 if debug:
     print(tCMD)
 else:
@@ -44,11 +58,11 @@ else:
 
 # Make all required torrents
 def genTorrent(size):
-    """ Creates a torrent of that size named t_file_size.torrent"""
+    """ Creates a torrent of size `size` named test_`size`.torrent"""
     # Generate file of appropriate size
     fillStr = '"y"'
     if size % 8 == 0:
-        fillStr = 'Net Sys'
+        fillStr = '"Net Sys"'
     file = "torrents/test_" + str(size)
     repettions = str(size // (len(fillStr) + 1))
     gCMD = " ".join(["yes", fillStr, "| head -n",  repettions, ">", file + ".txt"])
@@ -71,16 +85,23 @@ if not os.path.isdir("torrents"):
     os.system("mkdir torrents")
 for i in config["torrent_sizes"]:
     genTorrent(i)
+
+# Copy torrents to all the hosts
+copy('torrents', hosts[1:], dir=True)
+
 # Create seeders
 def gen_peer(host, file, seed=False):
+    """
+    Generates commands to create leechers or seeders of the `file` on the `host`.
+    """
     txtfile = file[:-8] + ".txt"
     if seed:
-        cmd = ["python run_peers.py -seed -num=" + str(config["seeders_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile]
+        cmd = ["python btExperiment/run_peers.py -seed -num=" + str(config["seeders_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile]
     else:
-        cmd = ["python run_peers.py -num=" + str(config["leechers_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile]
+        cmd = ["python btExperiment/run_peers.py -num=" + str(config["leechers_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile]
     if debug:
         cmd = cmd + [" -db"]
-    pCMD = " ".join(["ssh", host, "bash setup.sh;"] + cmd)
+    pCMD = " ".join(["ssh", host, 'bash "setup.sh;'] + cmd) + '"'
     if debug:
         print(pCMD)
     else:
