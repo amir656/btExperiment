@@ -88,6 +88,8 @@ for i in config["torrent_sizes"]:
 
 # Copy torrents to all the hosts
 copy('torrents', hosts[1:], dir=True)
+# Create docker image with torrents inside
+os.system('sudo docker build -t kraken .')
 
 # Create seeders
 def gen_peer(host, file, seed=False):
