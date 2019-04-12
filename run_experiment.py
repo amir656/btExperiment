@@ -52,7 +52,7 @@ def genTorrent(size):
     else:
         os.system(gCMD)
     # Create torrent file for it
-    dCMD = "python murder_make_torrent.py {}.txt localhost {}.torrent".format(file, file)
+    dCMD = "python murder_make_torrent.py {}.txt localhost:8998 {}.torrent".format(file, file)
     if debug:
         print(dCMD)
         os.system("touch " + file + ".txt")
@@ -77,9 +77,9 @@ def gen_peer(host, file, config, seed=False):
     """
     txtfile = file[:-8] + ".txt"
     if seed:
-        cmd = "python btExperiment/run_peers.py -seed -num={} -tor=torrents/{} -dest=torrents/{}".format(str(config["seeders_per_host"]), file, txtfile)
+        cmd = "python run_peers.py -seed -num={} -tor=torrents/{} -dest=torrents/{}".format(str(config["seeders_per_host"]), file, txtfile)
     else:
-        cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{}".format(str(config["leechers_per_host"]), file, txtfile)
+        cmd = "python run_peers.py -num={} -tor=torrents/{} -dest=torrents/{}".format(str(config["leechers_per_host"]), file, txtfile)
     if debug:
         cmd = cmd + " -db"
     pCMD = 'ssh {} bash "setup.sh; {}; clean.sh"'.format(host, cmd)

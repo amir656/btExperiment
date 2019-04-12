@@ -31,9 +31,9 @@ else:
 # Create peers
 for i in range(num_seeders):
     if seed:
-        name = "seed {}".format(str(i))
+        name = "seed{}".format(str(i))
     else:
-        name = "peer {}".format(str(i))
+        name = "peer{}".format(str(i))
     dockerPre = "sudo docker run -d --name {} --network host kraken".format(name)
     murderClient = "python murder_client.py seed {} {} localhost".format(file, file_dest)
     CMD = "{} {}".format(dockerPre, murderClient)
