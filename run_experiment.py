@@ -18,9 +18,9 @@ def copy(file, hosts, dir=False):
     """
     for host in hosts:
         if dir:
-            cpyCMD = " ".join(["scp -r", file, host + ":"])
+            cpyCMD = "scp -r {} {}:".format(file, host)
         else:
-            cpyCMD = " ".join(["scp", file, host + ":"])
+            cpyCMD = "scp {} {}:".format(file, host)
         if debug:
             print(cpyCMD)
         else:
@@ -30,8 +30,8 @@ def tracker(config):
     """
     Creates a tracker according to the configFile
     """
-    tracker = ["python murder_tracker.py"]
-    tCMD = " ".join(["ssh", config["tracker_host"], 'bash "setup.sh;'] + dockerPre + tracker) + '"'
+    tracker = "python murder_tracker.py"
+    tCMD = 'ssh {} bash "setup.sh; {} {}; clean.sh"'.format(config["tracker_host"], dockerPre ,tracker)
     if debug:
         print(tCMD)
     else:
@@ -45,15 +45,14 @@ def genTorrent(size):
     if size % 8 == 0:
         fillStr = '"Net Sys"'
     file = "torrents/test_" + str(size)
-    repettions = str(size // (len(fillStr) + 1))
-    gCMD = " ".join(["yes", fillStr, "| head -n",  repettions, ">", file + ".txt"])
+    repettions = str(size // (len(fillStr) - 1))
+    gCMD = "yes {} | head -n {} > {}.txt".format(fillStr, repettions, file)
     if debug:
         print(gCMD)
     else:
         os.system(gCMD)
     # Create torrent file for it
-    murderTorr = ["python murder_make_torrent.py", file + ".txt", "localhost", file + ".torrent"]
-    dCMD = " ".join(murderTorr)
+    dCMD = "python murder_make_torrent.py {}.txt localhost {}.torrent".format(file, file)
     if debug:
         print(dCMD)
         os.system("touch " + file + ".txt")
@@ -78,12 +77,12 @@ def gen_peer(host, file, config, seed=False):
     """
     txtfile = file[:-8] + ".txt"
     if seed:
-        cmd = ["python btExperiment/run_peers.py -seed -num=" + str(config["seeders_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile]
+        cmd = "python btExperiment/run_peers.py -seed -num={} -tor=torrents/{} -dest=torrents/{}".format(str(config["seeders_per_host"]), file, txtfile)
     else:
-        cmd = ["python btExperiment/run_peers.py -num=" + str(config["leechers_per_host"]), "-tor=torrents/" + file, "-dest=torrents/" + txtfile]
+        cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{}".format(str(config["leechers_per_host"]), file, txtfile)
     if debug:
-        cmd = cmd + [" -db"]
-    pCMD = " ".join(["ssh", host, 'bash "setup.sh;'] + cmd) + '"'
+        cmd = cmd + " -db"
+    pCMD = 'ssh {} bash "setup.sh; {}; clean.sh"'.format(host, cmd)
     if debug:
         print(pCMD)
     else:
@@ -117,7 +116,7 @@ def main():
 
     # Docker prefix for all commands
     global dockerPre
-    dockerPre = ["sudo docker run -d --network host kraken"]
+    dockerPre = "sudo docker run -d --network host kraken"
 
     # Parse argument JSON
     with open(configFile) as f:
@@ -127,8 +126,9 @@ def main():
 
     # List of all hosts
     hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
-    # Copy setup.sh to all the hosts
+    # Copy setup.sh and clean.sh to all the hosts
     copy('setup.sh', hosts)
+    copy('clean.sh', hosts)
     # Start tracker
     if debug: print("Generating tracker")
     tracker(config)
