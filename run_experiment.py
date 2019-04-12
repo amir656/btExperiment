@@ -2,6 +2,7 @@ import os
 import json
 import argparse
 
+# Utility Functions
 def is_valid_file(parser, file):
     """
     Checks if the file exists, erroring if it doesn't.
@@ -10,26 +11,6 @@ def is_valid_file(parser, file):
         parser.error("The file %s does not exist!" % file)
     else:
         return file
-
-# Parse argument
-parser = argparse.ArgumentParser(description='Read in Json Configuration.')
-parser.add_argument('--config', type=str, default="default.json",
-                    help='Pass in a JSON detailing how to run experiment')
-parser.add_argument('-db', action='store_true',
-                    help='prints out commands instead of executing to debug')
-args = parser.parse_args()
-configFile, debug = args.config, args.db
-
-# Parse argument JSON
-with open(configFile) as f:
-    config = json.load(f)
-print(config)
-
-# Docker prefix for all commands
-dockerPre = ["sudo docker run -d --network host kraken"]
-# List of all hosts
-hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
-
 
 def copy(file, hosts, dir=False):
     """
@@ -44,19 +25,19 @@ def copy(file, hosts, dir=False):
             print(cpyCMD)
         else:
             os.system(cpyCMD)
+# Tracker
+def tracker(config):
+    """
+    Creates a tracker according to the configFile
+    """
+    tracker = ["python murder_tracker.py"]
+    tCMD = " ".join(["ssh", config["tracker_host"], 'bash "setup.sh;'] + dockerPre + tracker) + '"'
+    if debug:
+        print(tCMD)
+    else:
+        os.system(tCMD)
 
-# Copy setup.sh to all the hosts
-copy('setup.sh', hosts)
-
-# Start tracker
-tracker = ["python murder_tracker.py"]
-tCMD = " ".join(["ssh", config["tracker_host"], 'bash "setup.sh;'] + dockerPre + tracker) + '"'
-if debug:
-    print(tCMD)
-else:
-    os.system(tCMD)
-
-# Make all required torrents
+# Torrents
 def genTorrent(size):
     """ Creates a torrent of size `size` named test_`size`.torrent"""
     # Generate file of appropriate size
@@ -81,20 +62,19 @@ def genTorrent(size):
         os.system(dCMD)
     return file
 
-if not os.path.isdir("torrents"):
-    os.system("mkdir torrents")
-for i in config["torrent_sizes"]:
-    genTorrent(i)
-
-# Copy torrents to all the hosts
-copy('torrents', hosts[1:], dir=True)
-# Create docker image with torrents inside
-os.system('sudo docker build -t kraken .')
-
-# Create seeders
-def gen_peer(host, file, seed=False):
+def genTorrents(config):
     """
-    Generates commands to create leechers or seeders of the `file` on the `host`.
+    Creates torrents according to the config file.
+    """
+    if not os.path.isdir("torrents"):
+        os.system("mkdir torrents")
+    for i in config["torrent_sizes"]:
+        genTorrent(i)
+
+# Peers
+def gen_peer(host, file, config, seed=False):
+    """
+    Generates a command to create leechers or seeders of the `file` on the `host`.
     """
     txtfile = file[:-8] + ".txt"
     if seed:
@@ -109,13 +89,59 @@ def gen_peer(host, file, seed=False):
     else:
         os.system(pCMD)
 
-for host in config["seeder_hosts"]:
-    for file in os.listdir("torrents"):
-        if file.endswith(".torrent"):
-            gen_peer(host, file, True)
-# Create leechers
-for host in config["leecher_hosts"]:
-    for file in os.listdir("torrents"):
-        if file.endswith(".torrent"):
-            gen_peer(host, file)
+def gen_peers(config):
+    # Create seeders
+    for host in config["seeder_hosts"]:
+        for file in os.listdir("torrents"):
+            if file.endswith(".torrent"):
+                gen_peer(host, file, config, True)
+    # Create leechers
+    for host in config["leecher_hosts"]:
+        for file in os.listdir("torrents"):
+            if file.endswith(".torrent"):
+                gen_peer(host, file, config)
 # Aggreagate logs
+def aggLogs(config):
+    print("NOT IMPLEMENTED YET")
+
+def main():
+    # Parse arguments
+    parser = argparse.ArgumentParser(description='Read in Json Configuration.')
+    parser.add_argument('--config', type=str, default="default.json",
+                        help='Pass in a JSON detailing how to run experiment')
+    parser.add_argument('-db', action='store_true',
+                        help='prints out commands instead of executing to debug')
+    args = parser.parse_args()
+    global debug
+    configFile, debug = args.config, args.db
+
+    # Docker prefix for all commands
+    global dockerPre
+    dockerPre = ["sudo docker run -d --network host kraken"]
+
+    # Parse argument JSON
+    with open(configFile) as f:
+        config = json.load(f)
+    if debug:
+        print(config)
+
+    # List of all hosts
+    hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
+    # Copy setup.sh to all the hosts
+    copy('setup.sh', hosts)
+    # Start tracker
+    if debug: print("Generating tracker")
+    tracker(config)
+    # Generate torrents
+    if debug: print("Generating torrents")
+    genTorrents(config)
+    # Copy torrents to all the hosts
+    copy('torrents', hosts[1:], dir=True)
+    # Build docker image with torrents inside
+    if not debug:
+        os.system('sudo docker build -t kraken .')
+    if debug: print("Generating peers")
+    gen_peers(config)
+
+if __name__== "__main__":
+  main()
