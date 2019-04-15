@@ -1,6 +1,8 @@
 import os
 import json
 import argparse
+import datetime
+
 
 # Utility Functions
 def is_valid_file(parser, file):
@@ -77,19 +79,23 @@ def gen_peer(host, file, config, seed=False):
     Generates a command to create leechers or seeders of the `file` on the `host`.
     Command returns a list of the names of the created docker containers for logs.
     """
+    time = str(datetime.datetime.now())
+    time = time.replace(" ", "_")
     txtfile = file[:-8] + ".txt"
     if seed:
-        cmd = "python btExperiment/run_peers.py -seed -num={} -tor=torrents/{} -dest=torrents/{}".format(str(config["seeders_per_host"]), file, txtfile)
+        name = "seed{}".format(str(time))
+        cmd = "python btExperiment/run_peers.py -seed -num={} -tor=torrents/{} -dest=torrents/{} -log={}".format(str(config["seeders_per_host"]), file, txtfile, name)
     else:
-        cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{}".format(str(config["leechers_per_host"]), file, txtfile)
+        name = "peer{}".format(str(time))
+        cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={}".format(str(config["leechers_per_host"]), file, txtfile, name)
     if debug:
         cmd = cmd + " -db"
     pCMD = 'ssh {} bash "setup.sh; {}; clean.sh"'.format(host, cmd)
     if debug:
         print(pCMD)
-        return ["dummy"]
     else:
-        return os.system(pCMD)
+        os.system(pCMD)
+    return name
 
 def gen_peers(config, logDir):
     # Create seeders
@@ -106,13 +112,13 @@ def gen_peers(config, logDir):
 # Aggregate logs
 def aggLogs(logDir):
     for host in logDir:
-        for name in logDir[host]:
-            logAgg = "mkdir -p logs; sudo docker logs {} >> logs/{}.txt;".format(name, name)
-            logCMD = 'ssh {} bash "{}"'.format(host, logAgg)
-            if debug:
-                print(logCMD)
-            else:
-                os.system(logCMD)
+        name = logDir[host]
+        logAgg = "mkdir -p logs; sudo docker logs {} >> logs/{}.txt;".format(name, name)
+        logCMD = 'ssh {} bash "{}"'.format(host, logAgg)
+        if debug:
+            print(logCMD)
+        else:
+            os.system(logCMD)
         logCPY = 'mkdir -p logs{}; scp {}:logs logs_{}/logs{}'.format(host, host, host, host)
         if debug:
             print(logCPY)
