@@ -1,5 +1,6 @@
 import os
 import argparse
+import datetime
 
 def is_valid_file(parser, arg):
     if not os.path.exists(arg):
@@ -7,37 +8,47 @@ def is_valid_file(parser, arg):
     else:
         return arg
 
-# Parse argument
-parser = argparse.ArgumentParser(description='Read in number of seeders.')
-parser.add_argument('-seed', action='store_true',
-                    help='should these peers seed or download? (default: True)')
-parser.add_argument('-num', type=int, default = 3,
-                    required=True, help='how many peers should we spin up? (default: 3)')
-parser.add_argument('-tor', type=lambda x: is_valid_file(parser, x),
-                    required=True, help='What torrent file should we use?')
-parser.add_argument('-dest',required=True,
-                    help='What is the name of the file you want to seed/download??')
-parser.add_argument('-db', action='store_true', default=False,
-                    help='print out commands for debugging? (default: False)')
+def main():
+    # Create peers
+    # Parse argument
+    parser = argparse.ArgumentParser(description='Read in number of seeders.')
+    parser.add_argument('-seed', action='store_true',
+                        help='should these peers seed or download? (default: True)')
+    parser.add_argument('-num', type=int, default = 3,
+                        required=True, help='how many peers should we spin up? (default: 3)')
+    parser.add_argument('-tor', type=lambda x: is_valid_file(parser, x),
+                        required=True, help='What torrent file should we use?')
+    parser.add_argument('-dest',required=True,
+                        help='What is the name of the file you want to seed/download??')
+    parser.add_argument('-db', action='store_true', default=False,
+                        help='print out commands for debugging? (default: False)')
 
-args = parser.parse_args()
-seed, num_seeders, file, file_dest, debug = args.seed, args.num, args.tor, args.dest, args.db
+    args = parser.parse_args()
+    seed, num_seeders, file, file_dest, debug = args.seed, args.num, args.tor, args.dest, args.db
 
-if seed:
-    assert is_valid_file(parser, file_dest), "Seeders require the file: " + file_dest
-else:
-    os.system("rm " + file_dest)
-
-# Create peers
-for i in range(num_seeders):
     if seed:
-        name = "seed{}".format(str(i))
+        assert is_valid_file(parser, file_dest), "Seeders require the file: " + file_dest
     else:
-        name = "peer{}".format(str(i))
-    dockerPre = "sudo docker run -d --name {} --network host kraken".format(name)
-    murderClient = "python murder_client.py seed {} {} localhost".format(file, file_dest)
-    CMD = "{} {}".format(dockerPre, murderClient)
+        os.system("rm " + file_dest)
+
+    names = []
+    for i in range(num_seeders):
+        r = str(datetime.datetime.now())
+        if seed:
+            name = "seed{}".format(str(r))
+        else:
+            name = "peer{}".format(str(r))
+        names.append(name)
+        dockerPre = "sudo docker run -d --name {} --network host kraken".format(name)
+        murderClient = "python murder_client.py seed {} {} localhost".format(file, file_dest)
+        CMD = "{} {}".format(dockerPre, murderClient)
+        if debug:
+            print(CMD)
+        else:
+            os.system(CMD)
     if debug:
-        print(CMD)
-    else:
-        os.system(CMD)
+        print(names)
+    return names
+
+if __name__== "__main__":
+  main()
