@@ -19,7 +19,7 @@ def main():
     for host in logDir:
         name = logDir[host]
         logAgg = "mkdir -p logs; sudo docker logs {} >> logs/{}.txt;".format(name, name)
-        logCMD = 'ssh {} bash "{}"'.format(host, logAgg)
+        logCMD = 'ssh {} "{}"'.format(host, logAgg)
         if debug:
             print(logCMD)
         else:

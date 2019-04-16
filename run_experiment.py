@@ -84,7 +84,8 @@ def gen_peer(host, file, config, seed=False):
     Generates a command to create leechers or seeders of the `file` on the `host`.
     Command returns a list of the names of the created docker containers for logs.
     """
-    date = str(int(time.time()))
+    # Appease docker's naming scheme by making time a number without a decimal
+    date = str(int(time.time() * 1000))
     txtfile = file[:-8] + ".txt"
     if seed:
         name = "seed{}".format(date)
@@ -157,7 +158,7 @@ def main():
     gen_peers(config, logDir)
     if debug: print("Saving logs")
     saveLogs(logDir)
-    if debug: print("{} workers".format(workers))
+    if debug: print("{} workers".format(len(workers)))
     # Waits on all threads to finish before cleaning
     wait(workers)
     runAllHosts("clean.sh", hosts)
