@@ -2,17 +2,8 @@ import os
 import json
 import argparse
 import datetime
-
-
-# Utility Functions
-def is_valid_file(parser, file):
-    """
-    Checks if the file exists, erroring if it doesn't.
-    """
-    if not os.path.exists(file):
-        parser.error("The file %s does not exist!" % file)
-    else:
-        return file
+import json
+from utils import is_valid_file
 
 def copy(file, hosts, dir=False):
     """
@@ -109,26 +100,19 @@ def gen_peers(config, logDir):
             if file.endswith(".torrent"):
                 logDir[host] = gen_peer(host, file, config)
 
-# Aggregate logs
-def aggLogs(logDir):
-    for host in logDir:
-        name = logDir[host]
-        logAgg = "mkdir -p logs; sudo docker logs {} >> logs/{}.txt;".format(name, name)
-        logCMD = 'ssh {} bash "{}"'.format(host, logAgg)
-        if debug:
-            print(logCMD)
-        else:
-            os.system(logCMD)
-        logCPY = 'mkdir -p logs_{}; scp {}:logs/{}.txt logs_{}/{}.txt'.format(host, host, name, host, name)
-        if debug:
-            print(logCPY)
-        else:
-            os.system(logCPY)
+def saveLogs(logDir):
+    time = str(datetime.datetime.now())
+    time = time.replace(" ", "_")
+    j = json.dumps(logDir)
+    os.system("mkdir -p log_locations")
+    f = open("log_locations/logs{}.json".format(time),"w")
+    f.write(j)
+    f.close()
 
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser(description='Read in Json Configuration.')
-    parser.add_argument('--config', type=str, default="default.json",
+    parser.add_argument('--config', type=lambda x: is_valid_file(parser, x), default="default.json",
                         help='Pass in a JSON detailing how to run experiment')
     parser.add_argument('-db', action='store_true',
                         help='prints out commands instead of executing to debug')
@@ -162,7 +146,7 @@ def main():
     logDir = {}
     gen_peers(config, logDir)
     if debug: print("Generating logs")
-    aggLogs(logDir)
+    saveLogs(logDir)
 
 if __name__== "__main__":
   main()

@@ -1,11 +1,6 @@
 import os
 import argparse
-
-def is_valid_file(parser, arg):
-    if not os.path.exists(arg):
-        parser.error("The file %s does not exist!" % arg)
-    else:
-        return arg
+from utils import is_valid_file
 
 def main():
     # Create peers
