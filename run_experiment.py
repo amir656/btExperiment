@@ -4,6 +4,7 @@ import argparse
 import time
 import json
 import threading
+import random
 from utils import is_valid_file, wait
 
 def execThread(cmd):
@@ -85,7 +86,7 @@ def gen_peer(host, file, config, seed=False):
     Command returns a list of the names of the created docker containers for logs.
     """
     # Appease docker's naming scheme by making time a number without a decimal
-    date = str(int(time.time() * 1000))
+    date = str(int(time.time() * 10000 + random.randint(1, 100)))
     txtfile = file[:-8] + ".txt"
     if seed:
         name = "seed{}".format(date)
