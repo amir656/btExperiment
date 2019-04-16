@@ -119,7 +119,7 @@ def aggLogs(logDir):
             print(logCMD)
         else:
             os.system(logCMD)
-        logCPY = 'mkdir -p logs{}; scp {}:logs logs_{}/logs{}'.format(host, host, host, host)
+        logCPY = 'mkdir -p logs_{}; scp {}:logs/{}.txt logs_{}/{}.txt'.format(host, host, name, host, name)
         if debug:
             print(logCPY)
         else:
