@@ -3,7 +3,20 @@ import json
 import argparse
 import time
 import json
+import threading
 from utils import is_valid_file
+
+def execThread(cmd):
+    def sleep_and_print(cmd):
+        time.sleep(1)
+        print(cmd)
+    if debug:
+        c = lambda : sleep_and_print(cmd)
+    else:
+        c = lambda : os.system(cmd)
+    t = threading.Thread(target=c)
+    t.dameon = True
+    t.start()
 
 def copy(file, hosts, dir=False):
     """
@@ -14,10 +27,7 @@ def copy(file, hosts, dir=False):
             cpyCMD = "scp -r {} {}:".format(file, host)
         else:
             cpyCMD = "scp {} {}:".format(file, host)
-        if debug:
-            print(cpyCMD)
-        else:
-            os.system(cpyCMD)
+        execThread(cpyCMD)
 # Tracker
 def tracker(config):
     """
@@ -26,10 +36,7 @@ def tracker(config):
     tracker = "python murder_tracker.py"
     dockerPre = "sudo docker run -d --network host kraken"
     tCMD = 'ssh {} bash "setup.sh; {} {}; clean.sh"'.format(config["tracker_host"], dockerPre ,tracker)
-    if debug:
-        print(tCMD)
-    else:
-        os.system(tCMD)
+    execThread(tCMD)
 
 # Torrents
 def genTorrent(size):
@@ -41,18 +48,12 @@ def genTorrent(size):
     file = "torrents/test_" + str(size)
     repettions = str(size // (len(fillStr) - 1))
     gCMD = "yes {} | head -n {} > {}.txt".format(fillStr, repettions, file)
-    if debug:
-        print(gCMD)
-    else:
-        os.system(gCMD)
+    execThread(gCMD)
     # Create torrent file for it
     dCMD = "python murder_make_torrent.py {}.txt localhost:8998 {}.torrent".format(file, file)
-    if debug:
-        print(dCMD)
-        os.system("touch " + file + ".txt")
-        os.system("touch " + file + ".torrent")
-    else:
-        os.system(dCMD)
+    execThread(dCMD)
+    os.system("touch " + file + ".txt")
+    os.system("touch " + file + ".torrent")
     return file
 
 def genTorrents(config):
@@ -82,10 +83,7 @@ def gen_peer(host, file, config, seed=False):
     if debug:
         cmd = cmd + " -db"
     pCMD = 'ssh {} bash "setup.sh; {}; clean.sh"'.format(host, cmd)
-    if debug:
-        print(pCMD)
-    else:
-        os.system(pCMD)
+    execThread(pCMD)
     return name
 
 def gen_peers(config, logDir):
