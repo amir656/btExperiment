@@ -1,7 +1,7 @@
 import os
 import json
 import argparse
-import datetime
+import time
 import json
 from utils import is_valid_file
 
@@ -70,14 +70,14 @@ def gen_peer(host, file, config, seed=False):
     Generates a command to create leechers or seeders of the `file` on the `host`.
     Command returns a list of the names of the created docker containers for logs.
     """
-    time = str(datetime.datetime.now())
-    time = time.replace(" ", "_")
+    date = str(int(time.time()))
+    date = date.replace(" ", "_")
     txtfile = file[:-8] + ".txt"
     if seed:
-        name = "seed{}".format(str(time))
+        name = "seed{}".format(str(date))
         cmd = "python btExperiment/run_peers.py -seed -num={} -tor=torrents/{} -dest=torrents/{} -log={}".format(str(config["seeders_per_host"]), file, txtfile, name)
     else:
-        name = "peer{}".format(str(time))
+        name = "peer{}".format(str(date))
         cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={}".format(str(config["leechers_per_host"]), file, txtfile, name)
     if debug:
         cmd = cmd + " -db"
@@ -101,11 +101,11 @@ def gen_peers(config, logDir):
                 logDir[host] = gen_peer(host, file, config)
 
 def saveLogs(logDir):
-    time = str(datetime.datetime.now())
-    time = time.replace(" ", "_")
+    date = str(int(time.time()))
+    date = date.replace(" ", "_")
     j = json.dumps(logDir)
     os.system("mkdir -p log_locations")
-    f = open("log_locations/logs{}.json".format(time),"w")
+    f = open("log_locations/logs{}.json".format(date),"w")
     f.write(j)
     f.close()
 
@@ -145,7 +145,7 @@ def main():
     if debug: print("Generating peers")
     logDir = {}
     gen_peers(config, logDir)
-    if debug: print("Generating logs")
+    if debug: print("Saving logs")
     saveLogs(logDir)
 
 if __name__== "__main__":
