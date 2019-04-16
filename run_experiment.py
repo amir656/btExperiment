@@ -7,16 +7,17 @@ import threading
 from utils import is_valid_file
 
 def execThread(cmd):
-    def sleep_and_print(cmd):
-        time.sleep(1)
+    def sleep_and_print(t, cmd):
+        time.sleep(t)
         print(cmd)
     if debug:
-        c = lambda : sleep_and_print(cmd)
+        c = lambda : sleep_and_print(.1, cmd)
     else:
         c = lambda : os.system(cmd)
     t = threading.Thread(target=c)
     t.dameon = True
     t.start()
+    return t
 
 def copy(file, hosts, dir=False):
     """
@@ -28,6 +29,20 @@ def copy(file, hosts, dir=False):
         else:
             cpyCMD = "scp {} {}:".format(file, host)
         execThread(cpyCMD)
+
+def runAllHosts(file, hosts, supress=False):
+    threads = []
+    for host in hosts:
+        cpyCMD = "scp {} {}:".format(file, host)
+        if supress:
+            runCMD = "ssh {} bash {} > /dev/null".format(file, host)
+        else:
+            runCMD = "ssh {} bash {}".format(file, host)
+        threads.append(execThread("{} ; {}".format(cpyCMD, runCMD)))
+    while threads != []:
+        threads = [t for t in threads if t.isAlive()]
+        time.sleep(.1)
+
 # Tracker
 def tracker(config):
     """
@@ -35,7 +50,7 @@ def tracker(config):
     """
     tracker = "python murder_tracker.py"
     dockerPre = "sudo docker run -d --network host kraken"
-    tCMD = 'ssh {} bash "setup.sh; {} {}; clean.sh"'.format(config["tracker_host"], dockerPre ,tracker)
+    tCMD = 'ssh {} bash "{} {};"'.format(config["tracker_host"], dockerPre ,tracker)
     execThread(tCMD)
 
 # Torrents
@@ -82,7 +97,7 @@ def gen_peer(host, file, config, seed=False):
         cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={}".format(str(config["leechers_per_host"]), file, txtfile, name)
     if debug:
         cmd = cmd + " -db"
-    pCMD = 'ssh {} bash "setup.sh; {}; clean.sh"'.format(host, cmd)
+    pCMD = 'ssh {} bash "{};"'.format(host, cmd)
     execThread(pCMD)
     return name
 
@@ -126,25 +141,25 @@ def main():
 
     # List of all hosts
     hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
-    # Copy setup.sh and clean.sh to all the hosts
-    copy('setup.sh', hosts)
-    copy('clean.sh', hosts)
-    # Start tracker
-    if debug: print("Generating tracker")
-    tracker(config)
+    # Copy setup.sh and run it. Waits for all of them to finish before proceeding.
+    runAllHosts("setup.sh", hosts, supress=True)
     # Generate torrents
     if debug: print("Generating torrents")
     genTorrents(config)
+    # Start tracker
+    if debug: print("Generating tracker")
+    tracker(config)
     # Copy torrents to all the hosts
     copy('torrents', hosts[1:], dir=True)
     # Build docker image with torrents inside
     if not debug:
-        os.system('sudo docker build -t kraken .')
+        os.system('sudo docker build -t kraken . > /dev/null')
     if debug: print("Generating peers")
     logDir = {}
     gen_peers(config, logDir)
     if debug: print("Saving logs")
     saveLogs(logDir)
+    runAllHosts("clean.sh", hosts)
 
 if __name__== "__main__":
   main()
