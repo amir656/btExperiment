@@ -5,9 +5,9 @@ import argparse
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Read in Json file.')
+    parser = argparse.ArgumentParser(description='Reads in the json of log locations.')
     parser.add_argument('-f', type=lambda x: is_valid_file(parser, x), default="default.json",
-                        help='Pass in a JSON detailing how to run experiment')
+                        help='Pass in a JSON detailing where to fetch the logs from')
     parser.add_argument('-db', action='store_true',
                         help='prints out commands instead of executing to debug')
 
@@ -18,13 +18,13 @@ def main():
         logDir = json.load(f)
     for host in logDir:
         name = logDir[host]
-        logAgg = "mkdir -p logs; sudo docker logs {} >> logs/{}.txt;".format(name, name)
+        logAgg = "mkdir -p logs && sudo docker logs {} >> logs/{}.txt".format(name, name)
         logCMD = 'ssh {} "{}"'.format(host, logAgg)
         if debug:
             print(logCMD)
         else:
             os.system(logCMD)
-        logCPY = 'mkdir -p logs/logs_{}; scp {}:logs/{}.txt logs/logs_{}/{}.txt'.format(host, host, name, host, name)
+        logCPY = 'mkdir -p logs/logs_{} && scp {}:logs/{}.txt logs/logs_{}/{}.txt'.format(host, host, name, host, name)
         if debug:
             print(logCPY)
         else:

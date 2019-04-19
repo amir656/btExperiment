@@ -13,6 +13,5 @@ def is_valid_file(parser, file):
         return file
 
 def wait(threads):
-    while threads != []:
-        threads = [t for t in threads if t.isAlive()]
-        time.sleep(.1)
+    for thread in threads:
+        thread.join()

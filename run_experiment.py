@@ -40,7 +40,7 @@ def runAllHosts(file, hosts, supress=False):
             runCMD = "ssh {} bash {} > /dev/null".format(host, file)
         else:
             runCMD = "ssh {} bash {}".format(host, file)
-        execThread("{} ; {}".format(cpyCMD, runCMD))
+        execThread("{} && {}".format(cpyCMD, runCMD))
 
 # Tracker
 def tracker(config):
@@ -86,7 +86,7 @@ def gen_peer(host, file, config, seed=False):
     Command returns a list of the names of the created docker containers for logs.
     """
     # Appease docker's naming scheme by making time a number without a decimal
-    date = str(int(time.time() * 10000 + random.randint(1, 100)))
+    date = str(int(time.time()*1000000 + random.randint(1, 100)))
     txtfile = file[:-8] + ".txt"
     if seed:
         name = "seed{}".format(date)
