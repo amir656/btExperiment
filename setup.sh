@@ -1,5 +1,7 @@
 sudo apt-get install python3 docker
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
+touch dir.txt
+echo "$tmp_dir" > dir.txt
 cd $tmp_dir
 git clone https://github.com/amir656/btExperiment.git
 cd btExperiment

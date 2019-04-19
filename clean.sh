@@ -1,1 +1,2 @@
-rm -rf $tmp_dir
+name=$(echo dir.txt)
+rm -rf $name

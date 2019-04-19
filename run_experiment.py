@@ -127,6 +127,8 @@ def main():
                         help='Pass in a JSON detailing how to run experiment')
     parser.add_argument('-db', action='store_true',
                         help='prints out commands instead of executing to debug')
+    parser.add_argument('-shutdown', action='store_true',
+                        help='shuts down all docker containers on hosts in config. Only flag after experiment is finished. Will shutdown all docker containers on the host, not just ones run in experiments.')
     args = parser.parse_args()
     global debug
     global workers
@@ -141,6 +143,9 @@ def main():
 
     # List of all hosts
     hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
+    if args.shutdown:
+        runAllHosts("shutdown.sh", hosts, supress=True)
+        return
     # Copy setup.sh and run it. Waits for all of them to finish before proceeding.
     runAllHosts("setup.sh", hosts, supress=True)
     wait(workers)
