@@ -34,7 +34,7 @@ def main():
     for i in range(num_seeders):
         dockerPre = "sudo docker run -d --name {} --network host kraken".format(log)
         murderClient = "python murder_client.py"
-        args = "--ip localhost --responsefile {} --saveas {} --upload_rate {} --download_rate {}".format(file, file_dest, u_rate, d_rate)
+        args = "--ip localhost --responsefile {} --saveas {} --max_upload_rate {} --max_download_rate {}".format(file, file_dest, u_rate, d_rate)
         CMD = "{} {} {}".format(dockerPre, murderClient, args)
         if debug:
             print(CMD)

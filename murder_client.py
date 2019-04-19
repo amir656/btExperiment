@@ -19,6 +19,7 @@
 
 import warnings
 import argparse
+from utils import is_valid_file
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 from BitTornado import PSYCO
@@ -127,7 +128,8 @@ class HeadlessDisplayer:
         self.timeEst = 'Download Failed!'
         self.downRate = ''
         global doneFlag
-        doneFlag.set()
+        if doneFlag != None:
+            doneFlag.set()
         #self.display()
 
     def error(self, errormsg):
@@ -277,18 +279,15 @@ if __name__ == '__main__':
     # Parse arguments
     parser = argparse.ArgumentParser(description='Read in parameters.')
     parser.add_argument("--responsefile", type=lambda x: is_valid_file(parser, x),
-                        help='Pass in the torrent file')
+                        help='Pass in the torrent file', required=True)
     parser.add_argument('--peer', action='store_true',
                         help='Flag for instantiating a peer instead of a seeder')
     parser.add_argument("--saveas", type=str,
-                        help='Where the torrent will be saved to. Must be same basename as torrent file.')
-    parser.add_argument("--ip", type=str, help="The last parameter is the local ip address, normally 127.0.0.1")
-    parser.add_argument("--upload_rate", type=float, help="Upload rate in kb/s")
-    parser.add_argument("--download_rate", type=float, help="Download rate in kb/s")
+                        help='Where the torrent will be saved to. Must be same basename as torrent file.', required=True)
+    parser.add_argument("--ip", type=str, help="The last parameter is the local ip address, normally 127.0.0.1", required=True)
+    parser.add_argument("--max_upload_rate", type=float, help="Upload rate in kb/s", required=True)
+    parser.add_argument("--max_download_rate", type=float, help="Download rate in kb/s", required=True)
 
     args = parser.parse_args()
-    global isPeer
     isPeer = args.peer
-
-
-  run(sys.argv[1:])
+    run(sys.argv[1:])
