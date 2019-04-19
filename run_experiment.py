@@ -89,11 +89,10 @@ def gen_peer(host, file, config, seed=False):
     date = str(int(time.time()*1000000 + random.randint(1, 100)))
     txtfile = file[:-8] + ".txt"
     if seed:
-        name = "seed{}".format(date)
-        cmd = "python btExperiment/run_peers.py -seed -num={} -tor=torrents/{} -dest=torrents/{} -log={}".format(str(config["seeders_per_host"]), file, txtfile, name)
+        name = "seed{} -seed".format(date)
     else:
         name = "peer{}".format(date)
-        cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={}".format(str(config["leechers_per_host"]), file, txtfile, name)
+    cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={} -u_rate={} -d_rate={}".format(str(config["leechers_per_host"]), file, txtfile, name, config["upload_rate"], config["download_rate"])
     if debug:
         cmd = cmd + " -db"
     pCMD = 'ssh {} {}'.format(host, cmd)

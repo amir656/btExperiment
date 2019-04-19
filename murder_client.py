@@ -18,6 +18,7 @@
 # last parameter is the local ip address, normally 10.x.x.x
 
 import warnings
+import argparse
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 from BitTornado import PSYCO
@@ -273,20 +274,21 @@ def run(params):
 
 if __name__ == '__main__':
 
-  if len(argv) != 5:
-    print "Incorrect number of arguments"
-    print
-    print """Usage:
-    python murder_client.py peer/seed out.torrent OUT.OUT 127.0.0.1
+    # Parse arguments
+    parser = argparse.ArgumentParser(description='Read in parameters.')
+    parser.add_argument("--responsefile", type=lambda x: is_valid_file(parser, x),
+                        help='Pass in the torrent file')
+    parser.add_argument('--peer', action='store_true',
+                        help='Flag for instantiating a peer instead of a seeder')
+    parser.add_argument("--saveas", type=str,
+                        help='Where the torrent will be saved to. Must be same basename as torrent file.')
+    parser.add_argument("--ip", type=str, help="The last parameter is the local ip address, normally 127.0.0.1")
+    parser.add_argument("--upload_rate", type=float, help="Upload rate in kb/s")
+    parser.add_argument("--download_rate", type=float, help="Download rate in kb/s")
 
-    The last parameter is the local ip address, normally 10.x.x.x
-    """
-    sys.exit(1)
+    args = parser.parse_args()
+    global isPeer
+    isPeer = args.peer
 
-  argv = ["--responsefile", sys.argv[2],
-          "--saveas", sys.argv[3],
-          "--ip", sys.argv[4]]
 
-  isPeer = sys.argv[1] == "peer"
-
-  run(argv[1:])
+  run(sys.argv[1:])
