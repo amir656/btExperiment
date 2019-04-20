@@ -169,11 +169,11 @@ class HeadlessDisplayer:
         for err in self.errors:
             print 'ERROR:\n' + err + '\n'
         #print 'saving:        ', self.file
-        #print 'percent done:  ', self.percentDone
+        print 'percent done:  ', self.percentDone
         #print 'time left:     ', self.timeEst
         #print 'download to:   ', self.downloadTo
-        #print 'download rate: ', self.downRate
-        #print 'upload rate:   ', self.upRate
+        print 'download rate: ', self.downRate
+        print 'upload rate:   ', self.upRate
         #print 'share rating:  ', self.shareRating
         print 'seed status:   ', self.seedStatus
         print 'peer status:   ', self.peerStatus
