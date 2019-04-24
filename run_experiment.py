@@ -26,20 +26,19 @@ def copy(file, hosts, dir=False):
     Copies file to hosts, set dir to true if file is a dir
     """
     for host in hosts:
+        r, i = '', ''
         if dir:
-            cpyCMD = "scp -r {} {}:".format(file, host)
-        else:
-            cpyCMD = "scp {} {}:".format(file, host)
+            r = "-r"
+        cpyCMD = "scp {} {} {} {}:".format(id, r, file, host)
         execThread(cpyCMD)
 
 def runAllHosts(file, hosts, supress=False):
     threads = []
     for host in hosts:
-        cpyCMD = "scp {} {}:".format(file, host)
+        cpyCMD = "scp {} {} {}:".format(id, file, host)
+        runCMD = "ssh {} {} bash {}".format(id, host, file)
         if supress:
-            runCMD = "ssh {} bash {} > /dev/null".format(host, file)
-        else:
-            runCMD = "ssh {} bash {}".format(host, file)
+            runCMD = runCMD + " > /dev/null"
         execThread("{} && {}".format(cpyCMD, runCMD))
 
 # Tracker
@@ -49,7 +48,7 @@ def tracker(config):
     """
     tracker = "python murder_tracker.py"
     dockerPre = "sudo docker run -d --network host kraken"
-    tCMD = 'ssh {} {} {};'.format(config["tracker_host"], dockerPre ,tracker)
+    tCMD = 'ssh {} {} {} {};'.format(id, config["tracker_host"], dockerPre ,tracker)
     execThread(tCMD)
 
 # Torrents
@@ -95,7 +94,7 @@ def gen_peer(host, file, config, seed=False):
     cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={} -u_rate={} -d_rate={}".format(str(config["leechers_per_host"]), file, txtfile, name, config["upload_rate"], config["download_rate"])
     if debug:
         cmd = cmd + " -db"
-    pCMD = 'ssh {} {}'.format(host, cmd)
+    pCMD = 'ssh {} {} {}'.format(id, host, cmd)
     execThread(pCMD)
     return name
 
@@ -134,12 +133,16 @@ def main():
     global workers
     configFile, debug = args.config, args.db
     workers = []
-
     # Parse argument JSON
     with open(configFile) as f:
         config = json.load(f)
     if debug:
         print(config)
+
+    global id
+    id = ''
+    if config["identity_file"]:
+        id = "-i {}".format(config["identity_file"])
 
     # List of all hosts
     hosts = [config["tracker_host"]] + config["seeder_hosts"] + config["leecher_hosts"]
@@ -162,6 +165,8 @@ def main():
     logDir = {}
     gen_peers(config, logDir)
     if debug: print("Saving logs")
+    if id:
+        logDir["identity_file"] = id
     saveLogs(logDir)
     if debug: print("{} workers".format(len(workers)))
     # Waits on all threads to finish before cleaning

@@ -1,4 +1,5 @@
 {
+    "identity_file": ".ssh/id_rsa.pu",
     "tracker_host":      "localhost",
     "seeder_hosts":      ["localhost"],
     "seeders_per_host":  2,

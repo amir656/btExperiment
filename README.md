@@ -12,6 +12,8 @@ Specify the setup of your experiment in a json file. A template is provided in d
 
 ```
 {
+    Identity_file you would like to use. Leave this blank to use default.
+    "identity_file":     ".ssh/id_rsa.pub",
     Host that you want to run your tracker on
     "tracker_host":      "localhost",
 
