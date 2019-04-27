@@ -1,2 +1,2 @@
-name=$(echo dir.txt)
+name=$(cat dir.txt)
 rm -rf $name
