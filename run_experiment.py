@@ -63,7 +63,7 @@ def genTorrent(size):
     gCMD = "yes {} | head -n {} > {}.txt".format(fillStr, repettions, file)
     execThread(gCMD)
     # Create torrent file for it
-    dCMD = "python murder_make_torrent.py {}.txt localhost:8998 {}.torrent".format(file, file)
+    dCMD = "python murder_make_torrent.py {}.txt {}:8998 {}.torrent".format(file, trackerhost, file)
     execThread(dCMD)
     if debug:
         os.system("touch " + file + ".txt")
