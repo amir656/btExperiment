@@ -22,17 +22,17 @@ def main():
     if "identity_file" in logDir:
         id = logDir.pop("identity_file")
     for host in logDir:
-        name = logDir[host]
-        logAgg = "mkdir -p logs && sudo docker logs {} >> logs/{}.txt".format(name, name)
-        logCMD = 'ssh {} {} "{}"'.format(id, host, logAgg)
-        if debug:
-            print(logCMD)
-        else:
-            os.system(logCMD)
-        logCPY = 'mkdir -p logs/logs_{} && scp {} {}:logs/{}.txt logs/logs_{}/{}.txt'.format(host, id, host, name, host, name)
-        if debug:
-            print(logCPY)
-        else:
-            os.system(logCPY)
+        for name in logDir[host]:
+            logAgg = "mkdir -p logs && sudo docker logs {} >> logs/{}.txt".format(name, name)
+            logCMD = 'ssh {} {} "{}"'.format(id, host, logAgg)
+            if debug:
+                print(logCMD)
+            else:
+                os.system(logCMD)
+            logCPY = 'mkdir -p logs/logs_{} && scp {} {}:logs/{}.txt logs/logs_{}/{}.txt'.format(host, id, host, name, host, name)
+            if debug:
+                print(logCPY)
+            else:
+                os.system(logCPY)
 if __name__== "__main__":
   main()

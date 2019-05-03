@@ -96,19 +96,19 @@ def gen_peer(host, file, config, seed=False):
         cmd = cmd + " -db"
     pCMD = 'ssh {} {} {}'.format(id, host, cmd)
     execThread(pCMD)
-    return name
+    return name.strip(" -seed")
 
 def gen_peers(config, logDir):
     # Create seeders
     for host in config["seeder_hosts"]:
         for file in os.listdir("torrents"):
             if file.endswith(".torrent"):
-                logDir[host] = gen_peer(host, file, config, True)
+                logDir[host].append(gen_peer(host, file, config, True))
     # Create leechers
     for host in config["leecher_hosts"]:
         for file in os.listdir("torrents"):
             if file.endswith(".torrent"):
-                logDir[host] = gen_peer(host, file, config)
+                logDir[host].append(gen_peer(host, file, config))
 
 def saveLogs(logDir):
     date = str(int(time.time()))
@@ -162,7 +162,7 @@ def main():
     copy('torrents', hosts[1:], dir=True)
 
     if debug: print("Generating peers")
-    logDir = {}
+    logDir = {host:[] for host in hosts}
     gen_peers(config, logDir)
     if debug: print("Saving logs")
     if id:
