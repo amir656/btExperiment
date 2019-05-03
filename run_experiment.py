@@ -52,7 +52,7 @@ def tracker(config):
     execThread(tCMD)
 
 # Torrents
-def genTorrent(size):
+def genTorrent(size, tracker_host):
     """ Creates a torrent of size `size` named test_`size`.torrent"""
     # Generate file of appropriate size
     fillStr = '"y"'
@@ -63,7 +63,7 @@ def genTorrent(size):
     gCMD = "yes {} | head -n {} > {}.txt".format(fillStr, repettions, file)
     execThread(gCMD)
     # Create torrent file for it
-    dCMD = "python murder_make_torrent.py {}.txt {}:8998 {}.torrent".format(file, trackerhost, file)
+    dCMD = "python murder_make_torrent.py {}.txt {}:8998 {}.torrent".format(file, tracker_host, file)
     execThread(dCMD)
     if debug:
         os.system("touch " + file + ".txt")
@@ -76,7 +76,7 @@ def genTorrents(config):
     """
     os.system("mkdir -p torrents")
     for i in config["torrent_sizes"]:
-        genTorrent(i)
+        genTorrent(i, config["tracker_host"])
 
 # Peers
 def gen_peer(host, file, config, seed=False):
