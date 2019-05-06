@@ -5,6 +5,7 @@ import time
 import json
 import threading
 import random
+import re
 from utils import is_valid_file, wait
 
 def execThread(cmd):
@@ -87,10 +88,11 @@ def gen_peer(host, file, config, seed=False):
     # Appease docker's naming scheme by making time a number without a decimal
     date = str(int(time.time()*1000000 + random.randint(1, 100)))
     txtfile = file[:-8] + ".txt"
+    size = re.match(r"test_(\d+)\.torrent", file).group(1)
     if seed:
-        name = "seed{} -seed".format(date)
+        name = "{}-seed{} -seed".format(size, date)
     else:
-        name = "peer{}".format(date)
+        name = "{}-peer{}".format(size, date)
     cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={} -u_rate={} -d_rate={}".format(str(config["leechers_per_host"]), file, txtfile, name, config["upload_rate"], config["download_rate"])
     if debug:
         cmd = cmd + " -db"
