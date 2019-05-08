@@ -93,7 +93,7 @@ def gen_peer(host, file, config, seed=False):
         name = "{}-seed{} -seed".format(size, date)
     else:
         name = "{}-peer{}".format(size, date)
-    cmd = "python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={} -u_rate={} -d_rate={}".format(str(config["leechers_per_host"]), file, txtfile, name, config["upload_rate"], config["download_rate"])
+    cmd = "cd $(cat dir.txt); python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={} -u_rate={} -d_rate={}".format(str(config["leechers_per_host"]), file, txtfile, name, config["upload_rate"], config["download_rate"])
     if debug:
         cmd = cmd + " -db"
     pCMD = 'ssh {} {} {}'.format(id, host, cmd)
@@ -138,8 +138,7 @@ def main():
     # Parse argument JSON
     with open(configFile) as f:
         config = json.load(f)
-    if debug:
-        print(config)
+    if debug: print(config)
 
     global id
     id = ''

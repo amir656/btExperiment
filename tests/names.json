@@ -1,0 +1,11 @@
+{
+    "identity_file": "~/.ssh/amir.pem",
+    "tracker_host":      "tracker",
+    "seeder_hosts":      ["seeder"],
+    "seeders_per_host":  2,
+    "leecher_hosts":     ["leecher", "leecher"],
+    "leechers_per_host": 1,
+    "torrent_sizes":     [1024, 5120, 10240, 20480],
+    "upload_rate": 200,
+    "download_rate": 300
+}
