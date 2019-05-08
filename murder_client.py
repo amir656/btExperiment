@@ -91,6 +91,7 @@ class HeadlessDisplayer:
         self.peerStatus = ''
         self.errors = []
         self.last_update_time = -1
+        self.start_time = time()
 
     def finished(self):
         global doneFlag
@@ -169,14 +170,14 @@ class HeadlessDisplayer:
         for err in self.errors:
             print 'ERROR:\n' + err + '\n'
         #print 'saving:        ', self.file
-        print 'percent done:  ', self.percentDone
+        # print 'percent done:  ', self.percentDone
         #print 'time left:     ', self.timeEst
         #print 'download to:   ', self.downloadTo
-        print 'download rate: ', self.downRate
-        print 'upload rate:   ', self.upRate
+        # print 'download rate: ', self.downRate
+        # print 'upload rate:   ', self.upRate
         #print 'share rating:  ', self.shareRating
-        print 'seed status:   ', self.seedStatus
-        print 'peer status:   ', self.peerStatus
+        # print 'seed status:   ', self.seedStatus
+        # print 'peer status:   ', self.peerStatus
         #stdout.flush()
         dpflag.set()
 
@@ -246,7 +247,12 @@ def run(params):
 
         infohash = sha(bencode(response['info'])).digest()
 
-        dow = BT1Download(h.display, h.finished, h.error, disp_exception, doneFlag,
+        start_time = time.time()
+        def callback():
+            print('Download time: ', time.time()-start_time)
+            return h.finished()
+
+        dow = BT1Download(h.display, callback, h.error, disp_exception, doneFlag,
                         config, response, infohash, myid, rawserver, listen_port,
                         configdir)
 
