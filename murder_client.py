@@ -91,8 +91,7 @@ class HeadlessDisplayer:
         self.peerStatus = ''
         self.errors = []
         self.last_update_time = -1
-        self.start_time = time()
-
+        
     def finished(self):
         global doneFlag
 
