@@ -58,7 +58,7 @@ def genTorrent(size, tracker_host):
     fillStr = '"y"'
     if size % 8 == 0:
         fillStr = '"Net Sys"'
-    file = "torrents/test_" + str(size)
+    file = "~/torrents/test_" + str(size)
     repettions = str(size // (len(fillStr) - 1))
     gCMD = "yes {} | head -n {} > {}.txt".format(fillStr, repettions, file)
     execThread(gCMD)
@@ -74,7 +74,7 @@ def genTorrents(config):
     """
     Creates torrents according to the config file.
     """
-    os.system("mkdir -p torrents")
+    os.system("mkdir -p ~/torrents")
     for i in config["torrent_sizes"]:
         genTorrent(i, config["tracker_host"])
 
