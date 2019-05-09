@@ -19,6 +19,7 @@
 
 import warnings
 import argparse
+import time
 from utils import is_valid_file
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 
@@ -91,7 +92,7 @@ class HeadlessDisplayer:
         self.peerStatus = ''
         self.errors = []
         self.last_update_time = -1
-        
+
     def finished(self):
         global doneFlag
 

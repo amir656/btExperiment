@@ -93,9 +93,9 @@ def gen_peer(host, file, config, seed=False):
         name = "{}-seed{} -seed".format(size, date)
     else:
         name = "{}-peer{}".format(size, date)
-    cmd = '"cd $(cat dir.txt); python btExperiment/run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={} -u_rate={} -d_rate={}"'.format(str(config["leechers_per_host"]), file, txtfile, name, config["upload_rate"], config["download_rate"])
+    cmd = '"cd $(cat dir.txt)/btExperiment; python run_peers.py -num={} -tor=torrents/{} -dest=torrents/{} -log={} -u_rate={} -d_rate={}"'.format(str(config["leechers_per_host"]), file, txtfile, name, config["upload_rate"], config["download_rate"])
     if debug:
-        cmd = cmd + " -db"
+        cmd = cmd[0:-1] + ' -db"'
     pCMD = 'ssh {} {} {}'.format(id, host, cmd)
     execThread(pCMD)
     return name.strip(" -seed")
