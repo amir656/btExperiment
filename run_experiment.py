@@ -2,7 +2,6 @@ import os
 import json
 import argparse
 import time
-import json
 import threading
 import random
 import re
@@ -27,7 +26,7 @@ def copy(file, hosts, dir=False):
     Copies file to hosts, set dir to true if file is a dir
     """
     for host in list(set(hosts)):
-        r, i = '', ''
+        r = ''
         if dir:
             r = "-r"
         cpyCMD = "scp {} {} {} {}:".format(id, r, file, host)
@@ -150,17 +149,22 @@ def main():
     if args.shutdown:
         runAllHosts("shutdown.sh", hosts, supress=True)
         return
-    # Copy setup.sh and run it. Waits for all of them to finish before proceeding.
-    runAllHosts("setup.sh", hosts, supress=True)
-    wait(workers)
+
     # Generate torrents
     if debug: print("Generating torrents")
     genTorrents(config)
+    wait(workers)
+    # Copy torrents to all the hosts
+    copy('torrents', hosts[1:], dir=True)
+    wait(workers)
+
+    # Copy setup.sh and run it on all hosts
+    runAllHosts("setup.sh", hosts, supress=True)
+    wait(workers)
+
     # Start tracker
     if debug: print("Generating tracker")
     tracker(config)
-    # Copy torrents to all the hosts
-    copy('torrents', hosts[1:], dir=True)
 
     if debug: print("Generating peers")
     logDir = {host:[] for host in hosts}
