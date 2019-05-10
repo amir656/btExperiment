@@ -74,7 +74,7 @@ def genTorrents(config):
     """
     Creates torrents according to the config file.
     """
-    os.system("mkdir -p ~/torrents")
+    os.system("mkdir -p ~/torrents/torrents")
     for i in config["torrent_sizes"]:
         genTorrent(i, config["tracker_host"])
 

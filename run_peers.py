@@ -30,15 +30,15 @@ def main():
     #     assert is_valid_file(parser, file_dest), "Seeders require the file: " + file_dest
     # else:
     #     os.system("rm " + file_dest)
-    rm = ""
-    if not seed:
-        rm = "--remove_file"
+    peer = "torrents/"
+    if seed:
+        peer = ""
 
     for i in range(num_seeders):
-        dockerPre = "sudo docker run -d --name {} --network host kraken".format(log)
-        murderClient = "python murder_client.py"
-        args = "--ip localhost --responsefile {} --saveas {} --max_upload_rate {} --max_download_rate {} {}".format(file, file_dest, u_rate, d_rate, rm)
-        CMD = "{} {} {}".format(dockerPre, murderClient, args)
+        dockerRun = "sudo docker run -d --name {} --network host kraken".format(log)
+        murderClient = '"python murder_client.py'
+        args = '--ip localhost --responsefile {} --saveas {}{} --max_upload_rate {} --max_download_rate {}"'.format(file, peer, file_dest, u_rate, d_rate)
+        CMD = "{} {} {}".format(dockerRun, murderClient, args)
         if debug:
             print(CMD)
         else:
