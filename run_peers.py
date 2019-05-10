@@ -32,7 +32,7 @@ def main():
     #     os.system("rm " + file_dest)
     rm = ""
     if not seed:
-        rm = "rm {} &&".format(file_dest)
+        rm = "rm torrents/{} &&".format(file_dest)
 
     for i in range(num_seeders):
         dockerPre = "sudo docker run -d --name {} --network host kraken".format(log)
