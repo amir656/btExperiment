@@ -292,8 +292,13 @@ if __name__ == '__main__':
                         help='Where the torrent will be saved to. Must be same basename as torrent file.', required=True)
     parser.add_argument("--ip", type=str, help="The last parameter is the local ip address, normally 127.0.0.1", required=True)
     parser.add_argument("--max_upload_rate", type=float, help="Upload rate in kb/s", required=True)
+    parser.add_argument("--remove_file", action='store_true',
+                        help='Flag for whether we should delete the file')
     parser.add_argument("--max_download_rate", type=float, help="Download rate in kb/s", required=True)
+
 
     args = parser.parse_args()
     isPeer = args.peer
+    if args.remove_file and os.path.isfile(args.saveas):
+        os.system("rm {}".format(args.saveas))
     run(sys.argv[1:])
