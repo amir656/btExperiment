@@ -26,16 +26,19 @@ def main():
     file_dest, log, debug = args.dest, args.log, args.db
     u_rate, d_rate = args.u_rate, args.d_rate
 
-    if seed:
-        assert is_valid_file(parser, file_dest), "Seeders require the file: " + file_dest
-    else:
-        os.system("rm " + file_dest)
+    # if seed:
+    #     assert is_valid_file(parser, file_dest), "Seeders require the file: " + file_dest
+    # else:
+    #     os.system("rm " + file_dest)
+    rm = ""
+    if not seed:
+        rm = "rm {} &&".format(file_dest)
 
     for i in range(num_seeders):
         dockerPre = "sudo docker run -d --name {} --network host kraken".format(log)
         murderClient = "python murder_client.py"
         args = "--ip localhost --responsefile {} --saveas {} --max_upload_rate {} --max_download_rate {}".format(file, file_dest, u_rate, d_rate)
-        CMD = "{} {} {}".format(dockerPre, murderClient, args)
+        CMD = "{} {} {} {}".format(rm, dockerPre, murderClient, args)
         if debug:
             print(CMD)
         else:
