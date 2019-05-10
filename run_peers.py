@@ -32,13 +32,13 @@ def main():
     #     os.system("rm " + file_dest)
     rm = ""
     if not seed:
-        rm = "rm torrents/{} &&".format(file_dest)
+        rm = "rm {} &&".format(file_dest)
 
     for i in range(num_seeders):
         dockerPre = "sudo docker run -d --name {} --network host kraken".format(log)
-        murderClient = "python murder_client.py"
+        murderClient = "bash {} python murder_client.py".format(rm)
         args = "--ip localhost --responsefile {} --saveas {} --max_upload_rate {} --max_download_rate {}".format(file, file_dest, u_rate, d_rate)
-        CMD = "{} {} {} {}".format(rm, dockerPre, murderClient, args)
+        CMD = "{} {} {}".format(rm, dockerPre, murderClient, args)
         if debug:
             print(CMD)
         else:
