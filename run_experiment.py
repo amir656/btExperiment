@@ -102,12 +102,12 @@ def gen_peer(host, file, config, seed=False):
 def gen_peers(config, logDir):
     # Create seeders
     for host in config["seeder_hosts"]:
-        for file in os.path.listdir(os.path.expanduser("~/torrents")):
+        for file in os.listdir(os.path.expanduser("~/torrents")):
             if file.endswith(".torrent"):
                 logDir[host].append(gen_peer(host, file, config, True))
     # Create leechers
     for host in config["leecher_hosts"]:
-        for file in os.path.listdir(os.path.expanduser("~/torrents")):
+        for file in os.listdir(os.path.expanduser("~/torrents")):
             if file.endswith(".torrent"):
                 logDir[host].append(gen_peer(host, file, config))
 
